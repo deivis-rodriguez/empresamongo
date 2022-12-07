@@ -11,4 +11,5 @@ import edu.mintic.empresamongo.entities.Usuario;
 public interface UsuarioRepository extends MongoRepository<Usuario, String> {
     Optional<Usuario> findByUsername(String username);
     Boolean existsByEmail(String email);
+    Boolean existsByUsername(String Username);
 }
