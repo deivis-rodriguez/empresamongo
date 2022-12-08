@@ -6,7 +6,6 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import edu.mintic.empresamongo.config.auth.model.UserDetailsImpl;
@@ -21,19 +20,19 @@ public class JwtUtils {
     @Value("${empresa.app.jwtSecret}")
     private String secrect; // = Base64.getEncoder().encodeToString("SECRET".getBytes());
 
-    public String generarToken(Authentication authentication) {
-        UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
+    public String generarToken(UserDetailsImpl userPrincipal) {
+       // UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
 
         return Jwts.builder().setSubject(userPrincipal.getUsername())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + tiempo))
-                .signWith(SignatureAlgorithm.RS256, secrect)
+                .signWith(SignatureAlgorithm.HS512, secrect.getBytes())
                 .compact();
     }
 
     public boolean validarToken(String token) {
         try {
-            Jwts.parser().setSigningKey(secrect).parseClaimsJws(token);
+            Jwts.parser().setSigningKey(secrect.getBytes()).parseClaimsJws(token);
             return true;
         } catch (Exception e) {
             LOGGER.error("se generó un error leyendo el token: {}", e.getMessage());
@@ -42,7 +41,7 @@ public class JwtUtils {
     }
 
     public String getUsernameDelToken(String token) {
-        return Jwts.parser().setSigningKey(secrect).parseClaimsJws(token).getBody().getSubject();
+        return Jwts.parser().setSigningKey(secrect.getBytes()).parseClaimsJws(token).getBody().getSubject();
     }
 
 }
